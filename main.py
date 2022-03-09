@@ -28,7 +28,7 @@ def createRandomModel(nParameters):
 	for i in range(nParameters):
 		weights.append(random.randint(0,20))
 
-	b = random.randint(-20,20)
+	b = random.randint(-10,10)
 
 	return weights, b
 
@@ -68,6 +68,10 @@ def errorFunctionMSE(weights, b, db):
 ## YA QUE TENEMOS LAS FUNCIONES DEL ERROR
 ## LO QUE TENEMOS QUE HACER AHORA ES MINIMIZAR EL ERROR
 ## CON EL METODO DEL GRADIENTE, ACTUALIZANDO PESOS Y SESGO
+## def desGradientAdjustment(weights, b, db, error, u):
+
+## DESPUES DE TENER AMBOS ERRORES OPTIMIZADOS HAY QUE HACER COMPARACIONES
+## def compareERROR(errorMAE, errorMSE):
         
 def main():
     dbParams = []

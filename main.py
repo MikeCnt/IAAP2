@@ -7,11 +7,18 @@ def readDB():
     db = []
 
     with open('P2DB.csv') as file:
-        reader = csv.reader(file)
+        reader = csv.reader(file, delimiter=',')
+        lines = 0
         for row in reader:
-            db.append(row)
-    
-    nParameters = len(db[0])
+            if lines == 0:
+                lines = lines + 1
+            else:
+                for i in range(len(row)):
+                    row[i] = float(row[i])
+
+                db.append(row)
+        
+        nParameters = len(db[0])
 
     return db, nParameters
 
@@ -30,7 +37,7 @@ def errorFunctionMAE(weights, b, db):
     sum = 0
 
     for i in range(len(db)):
-        temp = db[i+1]
+        temp = db[i]
         for j in range(len(temp)-1):
             yEstimated = 0
             yEstimated = yEstimated + (weights[j] * temp[j])
@@ -46,7 +53,7 @@ def errorFunctionMSE(weights, b, db):
     sum = 0
 
     for i in range(len(db)):
-        temp = db[i+1]
+        temp = db[i]
         for j in range(len(temp)-1):
             yEstimated = 0
             yEstimated = yEstimated + (weights[j] * temp[j])
@@ -63,8 +70,13 @@ def errorFunctionMSE(weights, b, db):
 ## CON EL METODO DEL GRADIENTE, ACTUALIZANDO PESOS Y SESGO
         
 def main():
-    nParameters = readDB()
-    createRandomModel(nParameters)
+    dbParams = []
+
+    dbParams = readDB()
+    randomModel = createRandomModel(dbParams[1])
+    print(errorFunctionMAE(randomModel[0], randomModel[1], dbParams[0]))
+    print(errorFunctionMSE(randomModel[0], randomModel[1], dbParams[0]))
+
 
 if __name__ == "__main__":
     main()

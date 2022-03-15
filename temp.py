@@ -1,16 +1,27 @@
-import pandas as pd
-import xlrd
-import random
 
 
+def desGradientAdjustmentMSE(weights, b, db, u, yEstimated):
 
-def createRandomModel(nParameters):
+	lastElement = len(db[0]) - 1
+	q = len(db)
 
-	weights = []
+	for i in range(len(db)):
+		sum = 0
 
-	for i in range(nParameters):
-		weights.append(random.randint(0,20))
+		for j in range(len(db[i])):
 
-	b = random.randint(0,50)
+			for k in range(q):
+
+				sum += (yEstimated - db[k][lastElement]) * db[i][j]
+
+			weights[j] = weights[j] - (u/q) * sum
+
+	
+	sum  = 0
+
+	for i in range(q):
+		sum += (yEstimated - db[i][lastElement])
+
+	b = b - (u/q) * sum
 
 	return weights, b

@@ -1,4 +1,5 @@
 import csv
+from traceback import print_tb
 import pandas as pd
 import random
 
@@ -113,14 +114,18 @@ def main():
 	errorVectorMAE = errorFunctionMAE(randomModel[0], randomModel[1], dbParams[0])
 	print(errorVectorMAE[0])
 
-	newModel = desGradientAdjustmentMAE(randomModel[0], randomModel[1], dbParams[0], 0.1, errorVectorMAE[1])
-	for i in range(10):
+	lastError = errorVectorMAE[0]
+	newError = lastError
+	newModel = randomModel
+	while newError <= lastError:
+		lastError = newError
 		newModel = desGradientAdjustmentMAE(newModel[0], newModel[1], dbParams[0], 0.1, errorVectorMAE[1])
+		aux = errorFunctionMAE(newModel[0], newModel[1], dbParams[0])
+		newError = aux[0]
 
 	print("\n")
 	print(newModel[0])
-	newError = errorFunctionMAE(newModel[0], newModel[1], dbParams[0])
-	print(newError[0])
+	print(newError)
 
 
 if __name__ == "__main__":

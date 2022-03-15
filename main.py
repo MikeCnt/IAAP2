@@ -78,9 +78,9 @@ def errorFunctionMSE(weights, b, db):
         
 def desGradientAdjustmentMAE(weights, b, db, u, yEstimated):
     for i in range(len(weights)):
+        sum = 0
         for j in range(len(db)):
             temp = db[j]
-            sum = 0
             if yEstimated[j] - temp[len(temp)-1] < 0:
                 for k in range(len(temp)-1):
                     sum = sum + (temp[k] * -1)

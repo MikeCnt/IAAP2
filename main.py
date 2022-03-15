@@ -90,26 +90,61 @@ def desGradientAdjustmentMAE(weights, b, db, u, yEstimated):
 
         weights[i] = weights[i] - ((u/len(db)) * sum)
     
-    newError = errorFunctionMAE(weights, b, db)
-    return newError[0]
+    for i in range(len(db)):
+        temp = db[i]
+        if yEstimated[i] - temp[len(temp)-1] < 0:
+            sum += -1
+        else:
+            sum += 1
+    
+    b -= (u/len(db)) * sum
 
+    return weights, b
+
+
+def desGradientAdjustmentMSE(weights, b, db, u, yEstimated):
+
+	lastElement = len(db[0]) - 1
+	q = len(db)
+
+	for i in range(len(db)):
+		sum = 0
+
+		for j in range(len(db[i])):
+
+			for k in range(q):
+
+				sum += (yEstimated[k] - db[k][lastElement]) * db[i][j]
+
+			weights[j] = weights[j] - (u/q) * sum
+
+	
+	sum  = 0
+
+	for i in range(q):
+		sum += (yEstimated[i] - db[i][lastElement])
+
+	b = b - (u/q) * sum
+
+	return weights, b
 
 def main():
-    dbParams = []
 
     dbParams = readDB()
     randomModel = createRandomModel(dbParams[1])
+
     errorVectorMAE = errorFunctionMAE(randomModel[0], randomModel[1], dbParams[0])
     errorVectorMSE = errorFunctionMSE(randomModel[0], randomModel[1], dbParams[0])
     print(errorVectorMAE[0])
     print(errorVectorMSE[0])
     print("\n")
-    
-    for i in range(1000):
-        newError = desGradientAdjustmentMAE(randomModel[0], randomModel[1], dbParams[0], 0.001, errorVectorMAE[1])
 
-    print(newError)
-
+    newModel = randomModel
+    for i in range(10000):
+        newModel = desGradientAdjustmentMAE(newModel[0], newModel[1], dbParams[0], 0.001, errorVectorMAE[1])
+   
+    newErrorMAE = errorFunctionMAE(newModel[0], newModel[1], dbParams[0])
+    print(newErrorMAE[0])
 
 if __name__ == "__main__":
     main()

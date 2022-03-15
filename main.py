@@ -1,5 +1,4 @@
 import csv
-from traceback import print_tb
 import pandas as pd
 import random
 
@@ -65,15 +64,8 @@ def errorFunctionMSE(weights, b, db):
 	error = sum / len(db)
 
 	return error, yEstimatedVectorMSE
-		
-## YA QUE TENEMOS LAS FUNCIONES DEL ERROR
-## LO QUE TENEMOS QUE HACER AHORA ES MINIMIZAR EL ERROR
-## CON EL METODO DEL GRADIENTE, ACTUALIZANDO PESOS Y SESGO
-## def desGradientAdjustment(weights, b, db, error, u):
 
-## DESPUES DE TENER AMBOS ERRORES OPTIMIZADOS HAY QUE HACER COMPARACIONES
-## def compareERROR(errorMAE, errorMSE):
-		
+
 def desGradientAdjustmentMAE(weights, b, db, u, yEstimatedMAE):
 
 	q = len(db)

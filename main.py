@@ -1,6 +1,30 @@
 import csv
+from turtle import color
 import pandas as pd
 import random
+import matplotlib.pyplot as plt
+
+def graphicLinealRegresion(db, error):
+	
+	fig, ax = plt.subplots(figsize = (8,6))
+
+	## Representamos la nube de puntos con los datos
+	for i in range(len(db)):
+		temp = db[i]
+		for k in range(len(temp)-1):
+			ax.scatter(temp[k], temp[len(temp)-1], marker='.', color='red')
+
+	## Representamos el modelo aleatorio y = Ax1 + Bx2 + ... + b y el error de este
+	
+
+	## Representamos el modelo ajustado y el error de este
+	
+
+
+	plt.title("Random Model")
+	plt.xlabel("x")
+	plt.ylabel("y")
+	plt.show()
 
 def readDB():
 	db = []
@@ -33,7 +57,7 @@ def createRandomModel(nParameters):
 
 def errorFunctionMAE(weights, b, db):
 	sum = 0
-	yEstimatedVectorMAE = []
+	yEstimatedVector = []
 	for i in range(len(db)):
 		temp = db[i]
 		yEstimated = 0
@@ -41,16 +65,16 @@ def errorFunctionMAE(weights, b, db):
 			yEstimated = yEstimated + (weights[j] * temp[j])
 		
 		yEstimated = yEstimated + b
-		yEstimatedVectorMAE.append(yEstimated)
+		yEstimatedVector.append(yEstimated)
 		sum = sum + abs(yEstimated - temp[len(temp)-1])
 
 	error = sum / len(db)
 
-	return error, yEstimatedVectorMAE
+	return error, yEstimatedVector
 
 def errorFunctionMSE(weights, b, db):
 	sum = 0
-	yEstimatedVectorMSE = []
+	yEstimatedVector = []
 	for i in range(len(db)):
 		temp = db[i]
 		yEstimated = 0
@@ -58,12 +82,12 @@ def errorFunctionMSE(weights, b, db):
 			yEstimated = yEstimated + (weights[j] * temp[j])
 		
 		yEstimated = yEstimated + b
-		yEstimatedVectorMSE.append(yEstimated)
+		yEstimatedVector.append(yEstimated)
 		sum = sum + pow(yEstimated - temp[len(temp)-1], 2)
 	
 	error = sum / len(db)
 
-	return error, yEstimatedVectorMSE
+	return error, yEstimatedVector
 
 
 def desGradientAdjustmentMAE(weights, b, db, u, yEstimatedMAE):
@@ -105,6 +129,8 @@ def main():
 	print(randomModel[0])
 	errorVectorMAE = errorFunctionMAE(randomModel[0], randomModel[1], dbParams[0])
 	print(errorVectorMAE[0])
+
+	graphicLinealRegresion(dbParams[0], errorVectorMAE[0])
 
 	lastError = errorVectorMAE[0]
 	newError = lastError

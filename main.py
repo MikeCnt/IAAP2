@@ -1,36 +1,14 @@
 import csv
-from turtle import color
 import pandas as pd
 import random
-import matplotlib.pyplot as plt
+import copy
 
-def graphicLinealRegresion(db, error):
-	
-	fig, ax = plt.subplots(figsize = (8,6))
-
-	## Representamos la nube de puntos con los datos
-	for i in range(len(db)):
-		temp = db[i]
-		for k in range(len(temp)-1):
-			ax.scatter(temp[k], temp[len(temp)-1], marker='.', color='red')
-
-	## Representamos el modelo aleatorio y = Ax1 + Bx2 + ... + b y el error de este
-	
-
-	## Representamos el modelo ajustado y el error de este
-	
-
-
-	plt.title("Random Model")
-	plt.xlabel("x")
-	plt.ylabel("y")
-	plt.show()
 
 def readDB():
 	db = []
 
 	with open('P2DB.csv') as file:
-		reader = csv.reader(file, delimiter=',')
+		reader = csv.reader(file, delimiter='\t')
 		lines = 0
 		for row in reader:
 			if lines == 0:
@@ -83,14 +61,14 @@ def errorFunctionMSE(weights, b, db):
 		
 		yEstimated = yEstimated + b
 		yEstimatedVector.append(yEstimated)
-		sum = sum + pow(yEstimated - temp[len(temp)-1], 2)
+		sum = sum + pow((yEstimated - temp[len(temp)-1]), 2)
 	
 	error = sum / len(db)
 
 	return error, yEstimatedVector
 
 
-def desGradientAdjustmentMAE(weights, b, db, u, yEstimatedMAE):
+def desGradientAdjustmentMAE(weights, b, db, u, yEstimated):
 
 	q = len(db)
 	for i in range(len(weights)):
@@ -98,7 +76,7 @@ def desGradientAdjustmentMAE(weights, b, db, u, yEstimatedMAE):
 		sum = 0
 		for j in range(len(db)):
 			temp = db[j]
-			if yEstimatedMAE[j] - temp[len(temp)-1] < 0:
+			if yEstimated[j] - temp[len(temp)-1] < 0:
 				for k in range(len(temp)-1):
 					sum += (-1 * temp[k])
 			else:
@@ -111,10 +89,33 @@ def desGradientAdjustmentMAE(weights, b, db, u, yEstimatedMAE):
 	for i in range(len(db)):
 		
 		temp = db[i]
-		if yEstimatedMAE[i] - temp[len(temp)-1] < 0:    
+		if yEstimated[i] - temp[len(temp)-1] < 0:    
 			sum += -1
 		else:
 			sum += 1
+
+	b -= (u/q) * sum
+
+	return weights, b
+
+def desGradientAdjustmentMSE(weights, b, db, u, yEstimated):
+
+	q = len(db)
+	for i in range(len(weights)):
+		
+		sum = 0
+		for j in range(len(db)):
+			temp = db[j]
+			for k in range(len(temp)-1):
+				sum += temp[k] * (yEstimated[j] - temp[len(temp)-1])
+
+		weights[i] -= (u/q) * sum
+
+	sum = 0
+	for i in range(len(db)):
+		
+		temp = db[i]
+		sum += (yEstimated[i] - temp[len(temp)-1]) 
 
 	b -= (u/q) * sum
 
@@ -126,25 +127,47 @@ def main():
 	dbParams = readDB()
 	randomModel = createRandomModel(dbParams[1])
 
-	print(randomModel[0])
+	print("<===========================================================>")
+	print("Random Model Weigths     -- ", randomModel[0])
+	print("Random Model Bias        -- ", randomModel[1])
 	errorVectorMAE = errorFunctionMAE(randomModel[0], randomModel[1], dbParams[0])
-	print(errorVectorMAE[0])
+	print("Random Model Error (MAE) -- ", errorVectorMAE[0])
 
-	graphicLinealRegresion(dbParams[0], errorVectorMAE[0])
-
-	lastError = errorVectorMAE[0]
-	newError = lastError
-	newModel = randomModel
+	lastError = copy.deepcopy(errorVectorMAE[0])
+	newError = copy.deepcopy(lastError)
+	newModel = copy.deepcopy(randomModel)
 	while newError <= lastError:
-		lastError = newError
+		lastError = copy.deepcopy(newError)
 		newModel = desGradientAdjustmentMAE(newModel[0], newModel[1], dbParams[0], 0.1, errorVectorMAE[1])
 		aux = errorFunctionMAE(newModel[0], newModel[1], dbParams[0])
+		newError = copy.deepcopy(aux[0])
+
+	print("\n")
+	print("Adjust Model Weigths     -- ", newModel[0])
+	print("Adjust Model Bias        -- ", newModel[1])
+	print("Adjust Model Error (MAE) -- ", newError)
+	print("<===========================================================>")
+	print("\n")
+	print("<===========================================================>")
+	print("Random Model Weigths     -- ", randomModel[0])
+	print("Random Model Bias        -- ", randomModel[1])
+	errorVectorMSE = errorFunctionMSE(randomModel[0], randomModel[1], dbParams[0])
+	print("Random Model Error (MSE) -- ", errorVectorMSE[0])
+
+	lastError = errorVectorMSE[0]
+	newError = lastError
+	newModel = copy.deepcopy(randomModel)
+	while newError <= lastError:
+		lastError = newError
+		newModel = desGradientAdjustmentMSE(newModel[0], newModel[1], dbParams[0], 0.1, errorVectorMSE[1])
+		aux = errorFunctionMSE(newModel[0], newModel[1], dbParams[0])
 		newError = aux[0]
 
 	print("\n")
-	print(newModel[0])
-	print(newError)
-
+	print("Adjust Model Weigths     -- ", newModel[0])
+	print("Adjust Model Bias        -- ", newModel[1])
+	print("Adjust Model Error (MSE) -- ", newError)
+	print("<===========================================================>")
 
 if __name__ == "__main__":
 	main()

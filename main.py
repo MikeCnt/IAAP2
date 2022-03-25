@@ -5,7 +5,7 @@ import copy
 
 
 def readDB():
-	db = []
+	db = [] 
 
 	with open('P2DB.csv') as file:
 		reader = csv.reader(file, delimiter='\t')
@@ -83,7 +83,7 @@ def desGradientAdjustmentMAE(weights, b, db, u, yEstimated):
 				for k in range(len(temp)-1):
 					sum += (1 * temp[k])
 
-		weights[i] -= (u/q) * sum
+		weights[i] -= ((u/q) * sum)
 
 	sum = 0
 	for i in range(len(db)):
@@ -98,6 +98,7 @@ def desGradientAdjustmentMAE(weights, b, db, u, yEstimated):
 
 	return weights, b
 
+
 def desGradientAdjustmentMSE(weights, b, db, u, yEstimated):
 
 	q = len(db)
@@ -109,7 +110,7 @@ def desGradientAdjustmentMSE(weights, b, db, u, yEstimated):
 			for k in range(len(temp)-1):
 				sum += temp[k] * (yEstimated[j] - temp[len(temp)-1])
 
-		weights[i] -= (u/q) * sum
+		weights[i] -= ((u/q) * sum)
 
 	sum = 0
 	for i in range(len(db)):
@@ -127,7 +128,7 @@ def main():
 	dbParams = readDB()
 	randomModel = createRandomModel(dbParams[1])
 
-	print("<===========================================================>")
+	print("<================================================================>")
 	print("Random Model Weigths     -- ", randomModel[0])
 	print("Random Model Bias        -- ", randomModel[1])
 	errorVectorMAE = errorFunctionMAE(randomModel[0], randomModel[1], dbParams[0])
@@ -136,38 +137,40 @@ def main():
 	lastError = copy.deepcopy(errorVectorMAE[0])
 	newError = copy.deepcopy(lastError)
 	newModel = copy.deepcopy(randomModel)
+
 	while newError <= lastError:
 		lastError = copy.deepcopy(newError)
-		newModel = desGradientAdjustmentMAE(newModel[0], newModel[1], dbParams[0], 0.1, errorVectorMAE[1])
+		newModel = desGradientAdjustmentMAE(newModel[0], newModel[1], dbParams[0], 0.001, errorVectorMAE[1])
 		aux = errorFunctionMAE(newModel[0], newModel[1], dbParams[0])
 		newError = copy.deepcopy(aux[0])
 
 	print("\n")
 	print("Adjust Model Weigths     -- ", newModel[0])
 	print("Adjust Model Bias        -- ", newModel[1])
-	print("Adjust Model Error (MAE) -- ", newError)
-	print("<===========================================================>")
+	print("Adjust Model Error (MAE) -- ", lastError)
+	print("<================================================================>")
 	print("\n")
-	print("<===========================================================>")
+	print("<================================================================>")
 	print("Random Model Weigths     -- ", randomModel[0])
 	print("Random Model Bias        -- ", randomModel[1])
 	errorVectorMSE = errorFunctionMSE(randomModel[0], randomModel[1], dbParams[0])
 	print("Random Model Error (MSE) -- ", errorVectorMSE[0])
 
-	lastError = errorVectorMSE[0]
-	newError = lastError
+	lastError = copy.deepcopy(errorVectorMSE[0])
+	newError = copy.deepcopy(lastError)
 	newModel = copy.deepcopy(randomModel)
+
 	while newError <= lastError:
-		lastError = newError
-		newModel = desGradientAdjustmentMSE(newModel[0], newModel[1], dbParams[0], 0.1, errorVectorMSE[1])
+		lastError = copy.deepcopy(newError)
+		newModel = desGradientAdjustmentMSE(newModel[0], newModel[1], dbParams[0], 0.001, errorVectorMSE[1])
 		aux = errorFunctionMSE(newModel[0], newModel[1], dbParams[0])
-		newError = aux[0]
+		newError = copy.deepcopy(aux[0])
 
 	print("\n")
 	print("Adjust Model Weigths     -- ", newModel[0])
 	print("Adjust Model Bias        -- ", newModel[1])
-	print("Adjust Model Error (MSE) -- ", newError)
-	print("<===========================================================>")
+	print("Adjust Model Error (MSE) -- ", lastError)
+	print("<================================================================>")
 
 if __name__ == "__main__":
 	main()

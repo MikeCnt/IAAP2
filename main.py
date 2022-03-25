@@ -149,6 +149,7 @@ def main():
 	print("Adjust Model Bias        -- ", newModel[1])
 	print("Adjust Model Error (MAE) -- ", lastError)
 	print("<================================================================>")
+	
 	print("\n")
 	print("<================================================================>")
 	print("Random Model Weigths     -- ", randomModel[0])
@@ -165,6 +166,34 @@ def main():
 		newModel = desGradientAdjustmentMSE(newModel[0], newModel[1], dbParams[0], 0.001, errorVectorMSE[1])
 		aux = errorFunctionMSE(newModel[0], newModel[1], dbParams[0])
 		newError = copy.deepcopy(aux[0])
+
+	print("\n")
+	print("Adjust Model Weigths     -- ", newModel[0])
+	print("Adjust Model Bias        -- ", newModel[1])
+	print("Adjust Model Error (MSE) -- ", lastError)
+	print("<================================================================>")
+
+	## PARTE DEL TURI CREATE ##
+
+	print("\n")
+	print("<================================================================>")
+	print("Random Model Weigths     -- ", randomModel[0])
+	print("Random Model Bias        -- ", randomModel[1])
+	print("Random Model Error (MSE Turi Create) -- ", errorVectorMSE[0])
+
+	print("\n")
+	print("Adjust Model Weigths     -- ", newModel[0])
+	print("Adjust Model Bias        -- ", newModel[1])
+	print("Adjust Model Error (MSE) -- ", lastError)
+	print("<================================================================>")
+
+	## PARTE DEL SCI-KIT LEARN ##
+
+	print("\n")
+	print("<================================================================>")
+	print("Random Model Weigths     -- ", randomModel[0])
+	print("Random Model Bias        -- ", randomModel[1])
+	print("Random Model Error (MSE Turi Create) -- ", errorVectorMSE[0])
 
 	print("\n")
 	print("Adjust Model Weigths     -- ", newModel[0])

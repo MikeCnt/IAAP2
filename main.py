@@ -2,6 +2,7 @@ import csv
 import pandas as pd
 import random
 import copy
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 
 def readDB():
@@ -32,6 +33,20 @@ def createRandomModel(nParameters):
 
 	return weights, b
 
+def predictionsTable(weights, db, yEstimated):
+	newTable = []
+
+	for i in range(len(db)):
+		temp = db[i]
+		aux = []
+		
+		for j in range(len(temp)-1):
+			aux.append(temp[j]*weights[j])
+		aux.append(yEstimated[i])
+
+		newTable.append(aux)
+
+	return newTable
 
 def errorFunctionMAE(weights, b, db):
 	sum = 0
@@ -133,6 +148,7 @@ def main():
 	print("Random Model Bias        -- ", randomModel[1])
 	errorVectorMAE = errorFunctionMAE(randomModel[0], randomModel[1], dbParams[0])
 	print("Random Model Error (MAE) -- ", errorVectorMAE[0])
+	y_pred = predictionsTable(randomModel[0], dbParams[0], errorVectorMAE[1]) # Modelo prediccion
 
 	lastError = copy.deepcopy(errorVectorMAE[0])
 	newError = copy.deepcopy(lastError)
@@ -175,30 +191,30 @@ def main():
 
 	## PARTE DEL TURI CREATE ##
 
-	print("\n")
-	print("<================================================================>")
-	print("Random Model Weigths     -- ", randomModel[0])
-	print("Random Model Bias        -- ", randomModel[1])
-	print("Random Model Error (MSE Turi Create) -- ", errorVectorMSE[0])
 
-	print("\n")
-	print("Adjust Model Weigths     -- ", newModel[0])
-	print("Adjust Model Bias        -- ", newModel[1])
-	print("Adjust Model Error (MSE) -- ", lastError)
-	print("<================================================================>")
 
 	## PARTE DEL SCI-KIT LEARN ##
 
 	print("\n")
 	print("<================================================================>")
-	print("Random Model Weigths     -- ", randomModel[0])
-	print("Random Model Bias        -- ", randomModel[1])
-	print("Random Model Error (MSE Turi Create) -- ", errorVectorMSE[0])
+	print("Random Model Error (MAE Scikit Learn) -- ", mean_absolute_error(dbParams[0], y_pred))
+	print("Random Model Error (MSE Scikit Learn) -- ", mean_squared_error(dbParams[0], y_pred))
+
+	lastError = copy.deepcopy(errorVectorMAE[0])
+	newError = copy.deepcopy(lastError)
+	newModel = copy.deepcopy(randomModel)
+
+	while newError <= lastError:
+		lastError = copy.deepcopy(newError)
+		newModel = desGradientAdjustmentMAE(newModel[0], newModel[1], dbParams[0], 0.001, errorVectorMAE[1])
+		aux = errorFunctionMAE(newModel[0], newModel[1], dbParams[0])
+		newError = copy.deepcopy(aux[0])
+
+	y_pred = predictionsTable(newModel[0], dbParams[0], errorVectorMAE[1])
 
 	print("\n")
-	print("Adjust Model Weigths     -- ", newModel[0])
-	print("Adjust Model Bias        -- ", newModel[1])
-	print("Adjust Model Error (MSE) -- ", lastError)
+	print("Adjust Model Error (MAE Scikit Learn) -- ", mean_absolute_error(dbParams[0], y_pred))
+	print("Adjust Model Error (MSE Scikit Learn) -- ", mean_squared_error(dbParams[0], y_pred))
 	print("<================================================================>")
 
 if __name__ == "__main__":

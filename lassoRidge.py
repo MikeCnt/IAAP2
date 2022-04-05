@@ -37,11 +37,15 @@ def createRandomModel(nParameters):
 
 
 def errorFunctionMAE(weights, b, db):
+
 	sum = 0
 	yEstimatedVector = []
+
 	for i in range(len(db)):
+
 		temp = db[i]
 		yEstimated = 0
+
 		for j in range(len(temp)-1):
 			yEstimated = yEstimated + (weights[j] * temp[j])
 		
@@ -51,20 +55,7 @@ def errorFunctionMAE(weights, b, db):
 
 	error = sum / len(db)
 
-	lassoSum = 0
-	ridgeSum = 0
-
-	for i in range(len(weights)):
-
-		lassoSum += abs(weights[i])
-		ridgeSum += pow(weights[i], 2)
-
-	paramRegularization = 0.01
-
-	errorLasso = error + paramRegularization * lassoSum
-	errorRidge = error + paramRegularization * ridgeSum
-
-	return error, yEstimatedVector, errorLasso, errorRidge
+	return error, yEstimatedVector
 
 	
 
@@ -83,20 +74,33 @@ def errorFunctionMSE(weights, b, db):
 	
 	error = sum / len(db)
 
-	lassoSum = 0
-	ridgeSum = 0
+	return error, yEstimatedVector
+
+
+def errorLasso(weights, error, coefAprend):
+
+	L1 = 0
 
 	for i in range(len(weights)):
 
-		lassoSum += abs(weights[i])
-		ridgeSum += pow(weights[i], 2)
+		L1 += abs(weights[i])
 
-	paramRegularization = 0.01
+	errorLasso = error + (coefAprend * L1)
 
-	errorLasso = error + paramRegularization * lassoSum
-	errorRidge = error + paramRegularization * ridgeSum
+	return errorLasso
 
-	return error, yEstimatedVector, errorLasso, errorRidge
+
+def errorRidge(weights, error, coefAprend):
+	
+	L2 = 0
+
+	for i in range(len(weights)):
+
+		L2 += pow(weights[i], 2)
+
+	errorRidge = error + (coefAprend * L2)
+
+	return errorRidge
 
 
 def desGradientAdjustmentMAE(weights, b, db, u, yEstimated):
@@ -160,16 +164,18 @@ def main():
 	randomModel = createRandomModel(dbParams[1])
 	coefAprendMAE = 0.0001
 	coefAprendMSE = 0.0000001
+	termRegular = 0.01
 
 
 
-#	ERRORES MAE
-
-##	ERROR MAE
+##	ERRORES MAE
 
 	print("<================================================================>")
 	print("Random Model Weigths     -- ", randomModel[0])
 	print("Random Model Bias        -- ", randomModel[1])
+
+
+#	ERROR MAE
 	errorVectorMAE = errorFunctionMAE(randomModel[0], randomModel[1], dbParams[0])
 	print("Random Model Error (MAE) -- ", errorVectorMAE[0])
 
@@ -179,73 +185,52 @@ def main():
 
 	newModel = copy.deepcopy(randomModel)
 
-	while newError <= lastError:
-		lastError = copy.deepcopy(newError)
-		newModel = desGradientAdjustmentMAE(newModel[0], newModel[1], dbParams[0], coefAprendMAE, errorVectorMAE[1])	
-		aux = errorFunctionMAE(newModel[0], newModel[1], dbParams[0])
-		newError = copy.deepcopy(aux[0])
 
-	print("\n")
-	print("Adjust Model Weigths     -- ", newModel[0])
-	print("Adjust Model Bias        -- ", newModel[1])
-	print("Adjust Model Error (MAE) -- ", lastError)
-	print("<================================================================>")
+#	ERROR LASSO MAE
+	errorL = errorLasso(randomModel[0], errorVectorMAE[0], termRegular)
+	print("Random Model Error Lasso (MAE) -- ", errorL)
 
-
-
-##	ERROR LASSO MAE
-
-	print("\n")
-	print("<================================================================>")
-	print("Random Model Weigths     -- ", randomModel[0])
-	print("Random Model Bias        -- ", randomModel[1])
-	errorVectorMAE = errorFunctionMAE(randomModel[0], randomModel[1], dbParams[0])
-	print("Random Model Error Lasso (MAE) -- ", errorVectorMAE[2])
-
-	lastErrorLasso = copy.deepcopy(errorVectorMAE[2])
+	lastErrorLasso = copy.deepcopy(errorL)
 
 	newErrorLasso = copy.deepcopy(lastErrorLasso)
 
-	newModel = copy.deepcopy(randomModel)
 
-	while newErrorLasso <= lastErrorLasso:
-		lastErrorLasso = copy.deepcopy(newErrorLasso)
-		newModel = desGradientAdjustmentMAE(newModel[0], newModel[1], dbParams[0], coefAprendMAE, errorVectorMAE[1])	
-		aux = errorFunctionMAE(newModel[0], newModel[1], dbParams[0])
-		newErrorLasso = copy.deepcopy(aux[2])
+#	ERROR RIDGE MAE
+	errorR = errorRidge(randomModel[0], errorVectorMAE[0], termRegular)
+	print("Random Model Error Ridge (MAE) -- ", errorR)
 
-	print("\n")
-	print("Adjust Model Weigths     -- ", newModel[0])
-	print("Adjust Model Bias        -- ", newModel[1])
-	print("Adjust Model Error Lasso (MAE) -- ", lastErrorLasso)
-	print("<================================================================>")
-
-
-
-##	ERROR RIDGE MAE
-
-	print("\n")
-	print("<================================================================>")
-	print("Random Model Weigths     -- ", randomModel[0])
-	print("Random Model Bias        -- ", randomModel[1])
-	errorVectorMAE = errorFunctionMAE(randomModel[0], randomModel[1], dbParams[0])
-	print("Random Model Error Ridge (MAE) -- ", errorVectorMAE[3])
-
-	lastErrorRidge = copy.deepcopy(errorVectorMAE[3])
+	lastErrorRidge = copy.deepcopy(errorR)
 
 	newErrorRidge = copy.deepcopy(lastErrorRidge)
 
-	newModel = copy.deepcopy(randomModel)
 
-	while newErrorRidge <= lastErrorRidge:
+#	AJUSTE
+	while newError <= lastError:
+		lastError = copy.deepcopy(newError)
+		lastErrorLasso = copy.deepcopy(newErrorLasso)
 		lastErrorRidge = copy.deepcopy(newErrorRidge)
 		newModel = desGradientAdjustmentMAE(newModel[0], newModel[1], dbParams[0], coefAprendMAE, errorVectorMAE[1])	
 		aux = errorFunctionMAE(newModel[0], newModel[1], dbParams[0])
-		newErrorRidge = copy.deepcopy(aux[3])
+		auxL = errorLasso(newModel[0], aux[0], termRegular)
+		auxR = errorRidge(newModel[0], aux[0], termRegular)
+		newError = copy.deepcopy(aux[0])
+		newErrorLasso = copy.deepcopy(auxL)
+		newErrorRidge = copy.deepcopy(auxR)
 
 	print("\n")
 	print("Adjust Model Weigths     -- ", newModel[0])
 	print("Adjust Model Bias        -- ", newModel[1])
+
+
+#	ERROR MAE
+	print("Adjust Model Error (MAE) -- ", lastError)
+
+
+#	ERROR LASSO MAE
+	print("Adjust Model Error Lasso (MAE) -- ", lastErrorLasso)
+
+
+#	ERROR RIDGE MAE
 	print("Adjust Model Error Ridge (MAE) -- ", lastErrorRidge)
 	print("<================================================================>")
 	
@@ -255,89 +240,70 @@ def main():
 
 
 #	ERRORES MSE
-
-##	ERROR MSE
-
+	print("\n")
 	print("\n")
 	print("<================================================================>")
 	print("Random Model Weigths     -- ", randomModel[0])
 	print("Random Model Bias        -- ", randomModel[1])
+
+
+#	ERROR MSE
 	errorVectorMSE = errorFunctionMSE(randomModel[0], randomModel[1], dbParams[0])
 	print("Random Model Error (MSE) -- ", errorVectorMSE[0])
 
 	lastError = copy.deepcopy(errorVectorMSE[0])
+
 	newError = copy.deepcopy(lastError)
+
 	newModel = copy.deepcopy(randomModel)
 
-	while newError <= lastError:
-		lastError = copy.deepcopy(newError)
-		newModel = desGradientAdjustmentMSE(newModel[0], newModel[1], dbParams[0], coefAprendMSE, errorVectorMSE[1])
-		aux = errorFunctionMSE(newModel[0], newModel[1], dbParams[0])
-		newError = copy.deepcopy(aux[0])
 
-	print("\n")
-	print("Adjust Model Weigths     -- ", newModel[0])
-	print("Adjust Model Bias        -- ", newModel[1])
-	print("Adjust Model Error (MSE) -- ", lastError)
-	print("<================================================================>")
+#	ERROR LASSO MSE
+	errorL = errorLasso(randomModel[0], errorVectorMSE[0], termRegular)
+	print("Random Model Error Lasso (MSE) -- ", errorL)
 
-
-
-##	ERROR LASSO MSE
-
-	print("\n")
-	print("<================================================================>")
-	print("Random Model Weigths     -- ", randomModel[0])
-	print("Random Model Bias        -- ", randomModel[1])
-	errorVectorMSE = errorFunctionMSE(randomModel[0], randomModel[1], dbParams[0])
-	print("Random Model Error Lasso (MSE) -- ", errorVectorMSE[2])
-
-	lastErrorLasso = copy.deepcopy(errorVectorMSE[2])
+	lastErrorLasso = copy.deepcopy(errorL)
 
 	newErrorLasso = copy.deepcopy(lastErrorLasso)
 
-	newModel = copy.deepcopy(randomModel)
 
-	while newErrorLasso <= lastErrorLasso:
-		lastErrorLasso = copy.deepcopy(newErrorLasso)
-		newModel = desGradientAdjustmentMSE(newModel[0], newModel[1], dbParams[0], coefAprendMSE, errorVectorMSE[1])	
-		aux = errorFunctionMSE(newModel[0], newModel[1], dbParams[0])
-		newErrorLasso = copy.deepcopy(aux[2])
+#	ERROR RIDGE MSE
+	errorR = errorRidge(randomModel[0], errorVectorMSE[0], termRegular)
+	print("Random Model Error Ridge (MSE) -- ", errorR)
 
-	print("\n")
-	print("Adjust Model Weigths     -- ", newModel[0])
-	print("Adjust Model Bias        -- ", newModel[1])
-	print("Adjust Model Error Lasso (MSE) -- ", lastErrorLasso)
-	print("<================================================================>")
-
-
-
-##	ERROR RIDGE MSE
-
-	print("\n")
-	print("<================================================================>")
-	print("Random Model Weigths     -- ", randomModel[0])
-	print("Random Model Bias        -- ", randomModel[1])
-	errorVectorMSE = errorFunctionMSE(randomModel[0], randomModel[1], dbParams[0])
-	print("Random Model Error Ridge (MSE) -- ", errorVectorMSE[3])
-
-	lastErrorRidge = copy.deepcopy(errorVectorMSE[3])
+	lastErrorRidge = copy.deepcopy(errorR)
 
 	newErrorRidge = copy.deepcopy(lastErrorRidge)
 
-	newModel = copy.deepcopy(randomModel)
 
-	while newErrorRidge <= lastErrorRidge:
+#	AJUSTE
+	while newError <= lastError:
+		lastError = copy.deepcopy(newError)
+		lastErrorLasso = copy.deepcopy(newErrorLasso)
 		lastErrorRidge = copy.deepcopy(newErrorRidge)
 		newModel = desGradientAdjustmentMSE(newModel[0], newModel[1], dbParams[0], coefAprendMSE, errorVectorMSE[1])	
 		aux = errorFunctionMSE(newModel[0], newModel[1], dbParams[0])
-		newErrorRidge = copy.deepcopy(aux[3])
+		auxL = errorLasso(newModel[0], aux[0], termRegular)
+		auxR = errorRidge(newModel[0], aux[0], termRegular)
+		newError = copy.deepcopy(aux[0])
+		newErrorLasso = copy.deepcopy(auxL)
+		newErrorRidge = copy.deepcopy(auxR)
 
 	print("\n")
 	print("Adjust Model Weigths     -- ", newModel[0])
 	print("Adjust Model Bias        -- ", newModel[1])
-	print("Adjust Model Error Ridge (MSE) -- ", lastErrorLasso)
-	print("<================================================================>")
+
+
+#	ERROR MSE
+	print("Adjust Model Error (MSE) -- ", lastError)
+
+
+#	ERROR LASSO MSE
+	print("Adjust Model Error Lasso (MSE) -- ", lastErrorLasso)
+
+
+#	ERROR RIDGE MSE
+	print("Adjust Model Error Ridge (MSE) -- ", lastErrorRidge)
 	print("<================================================================>")
 
 
